@@ -63,6 +63,8 @@ train_label = tf.convert_to_tensor(y_train)
 train_mask = tf.convert_to_tensor(train_mask)
 val_label = tf.convert_to_tensor(y_val)
 val_mask = tf.convert_to_tensor(val_mask)
+test_label = tf.convert_to_tensor(y_test)
+test_mask = tf.convert_to_tensor(test_mask)
 features = tf.SparseTensor(*features)
 support = [tf.cast(tf.SparseTensor(*support[0]), dtype=tf.float32)]
 num_features_nonzero = features.values.shape
@@ -71,7 +73,6 @@ dropout = args.dropout
 
 optimizer = optimizers.Adam(lr=1e-2)
 
-cost_val = []
 
 
 for epoch in range(args.epochs):
@@ -86,3 +87,10 @@ for epoch in range(args.epochs):
 
 
     print(epoch, float(loss), float(acc), '\tval:', float(val_acc))
+
+
+
+test_loss, test_acc = model((features, test_label, test_mask, support), training=False)
+
+
+print('\ttest:', float(test_loss), float(test_acc))

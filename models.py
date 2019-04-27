@@ -96,7 +96,7 @@ class GCN(keras.Model):
         outputs = [x]
 
         for layer in self.layers:
-            hidden = layer((outputs[-1], support))
+            hidden = layer((outputs[-1], support), training)
             outputs.append(hidden)
         output = outputs[-1]
 

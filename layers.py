@@ -124,9 +124,9 @@ class GraphConvolution(layers.Layer):
         x, support_ = inputs
 
         # dropout
-        if training and self.is_sparse_inputs:
+        if training is not False and self.is_sparse_inputs:
             x = sparse_dropout(x, self.dropout, self.num_features_nonzero)
-        elif training:
+        elif training is not False:
             x = tf.nn.dropout(x, self.dropout)
 
 
