@@ -16,4 +16,4 @@ python train.py
 
 # Screenshot
 
-![](res/scree.png)
+![](res/screen.png)
