@@ -65,17 +65,11 @@ model = GCN(input_dim=features[2][1], output_dim=y_train.shape[1],
 
 
 
-# # Define model evaluation function
-# def evaluate(features, support, labels, mask, placeholders):
-#     t_test = time.time()
-#     feed_dict_val = construct_feed_dict(features, support, labels, mask, placeholders)
-#     outs_val = sess.run([model.loss, model.accuracy], feed_dict=feed_dict_val)
-#     return outs_val[0], outs_val[1], (time.time() - t_test)
-#
 
-
-label = tf.convert_to_tensor(y_train)
-labels_mask = tf.convert_to_tensor(train_mask)
+train_label = tf.convert_to_tensor(y_train)
+train_mask = tf.convert_to_tensor(train_mask)
+val_label = tf.convert_to_tensor(y_val)
+val_mask = tf.convert_to_tensor(val_mask)
 features = tf.SparseTensor(*features)
 support = [tf.cast(tf.SparseTensor(*support[0]), dtype=tf.float32)]
 num_features_nonzero = features.values.shape
@@ -93,31 +87,13 @@ for epoch in range(args.epochs):
     t = time.time()
 
     with tf.GradientTape() as tape:
-
-        # Training step
-        loss, acc = model((features, label, labels_mask,support))
+        loss, acc = model((features, train_label, train_mask,support))
     grads = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
 
-    print(epoch, float(loss))
 
-    # # Validation
-    # cost, acc, duration = evaluate(features, support, y_val, val_mask, placeholders)
-    # cost_val.append(cost)
-    #
-    # # Print results
-    # print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(outs[1]),
-    #       "train_acc=", "{:.5f}".format(outs[2]), "val_loss=", "{:.5f}".format(cost),
-    #       "val_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
+    _, val_acc = model((features, val_label, val_mask, support))
 
-#     if epoch > args.early_stopping and cost_val[-1] > np.mean(cost_val[-(args.early_stopping+1):-1]):
-#         print("Early stopping...")
-#         break
-#
-# print("Optimization Finished!")
-#
-# # Testing
-# test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)
-# print("Test set results:", "cost=", "{:.5f}".format(test_cost),
-#       "accuracy=", "{:.5f}".format(test_acc), "time=", "{:.5f}".format(test_duration))
+
+    print(epoch, float(loss), float(acc), '\tval:', float(val_acc))

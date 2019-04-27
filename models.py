@@ -187,7 +187,10 @@ class GCN(keras.Model):
         # Cross entropy error
         loss += masked_softmax_cross_entropy(output, label, mask)
 
-        return loss, None
+
+        acc = masked_accuracy(output, label, mask)
+
+        return loss, acc
 
     def predict(self):
         return tf.nn.softmax(self.outputs)
