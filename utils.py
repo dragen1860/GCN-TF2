@@ -1,13 +1,15 @@
-import numpy as np
-import pickle as pkl
-import networkx as nx
-import scipy.sparse as sp
-from scipy.sparse.linalg.eigen.arpack import eigsh
-import sys
+import  numpy as np
+import  pickle as pkl
+import  networkx as nx
+import  scipy.sparse as sp
+from    scipy.sparse.linalg.eigen.arpack import eigsh
+import  sys
 
 
 def parse_index_file(filename):
-    """Parse index file."""
+    """
+    Parse index file.
+    """
     index = []
     for line in open(filename):
         index.append(int(line.strip()))
@@ -15,7 +17,9 @@ def parse_index_file(filename):
 
 
 def sample_mask(idx, l):
-    """Create mask."""
+    """
+    Create mask.
+    """
     mask = np.zeros(l)
     mask[idx] = 1
     return np.array(mask, dtype=np.bool)
@@ -139,19 +143,13 @@ def preprocess_adj(adj):
     return sparse_to_tuple(adj_normalized)
 
 
-def construct_feed_dict(features, support, labels, labels_mask, placeholders):
-    """Construct feed dictionary."""
-    feed_dict = dict()
-    feed_dict.update({placeholders['labels']: labels})
-    feed_dict.update({placeholders['labels_mask']: labels_mask})
-    feed_dict.update({placeholders['features']: features})
-    feed_dict.update({placeholders['support'][i]: support[i] for i in range(len(support))})
-    feed_dict.update({placeholders['num_features_nonzero']: features[1].shape})
-    return feed_dict
+
 
 
 def chebyshev_polynomials(adj, k):
-    """Calculate Chebyshev polynomials up to order k. Return a list of sparse matrices (tuple representation)."""
+    """
+    Calculate Chebyshev polynomials up to order k. Return a list of sparse matrices (tuple representation).
+    """
     print("Calculating Chebyshev polynomials up to order {}...".format(k))
 
     adj_normalized = normalize_adj(adj)

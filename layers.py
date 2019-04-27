@@ -21,15 +21,15 @@ def get_layer_uid(layer_name=''):
         return _LAYER_UIDS[layer_name]
 
 
-def sparse_dropout(x, keep_prob, noise_shape):
+def sparse_dropout(x, rate, noise_shape):
     """
     Dropout for sparse tensors.
     """
-    random_tensor = keep_prob
+    random_tensor = 1 - rate
     random_tensor += tf.random.uniform(noise_shape)
     dropout_mask = tf.cast(tf.floor(random_tensor), dtype=tf.bool)
     pre_out = tf.sparse.retain(x, dropout_mask)
-    return pre_out * (1./keep_prob)
+    return pre_out * (1./(1 - rate))
 
 
 def dot(x, y, sparse=False):
@@ -43,54 +43,9 @@ def dot(x, y, sparse=False):
     return res
 
 
-class Layer(object):
-    """
-    Base layer class. Defines basic API for all layer objects.
-    Implementation inspired by keras (http://keras.io).
-
-    # Properties
-        name: String, defines the variable scope of the layer.
-        logging: Boolean, switches Tensorflow histogram logging on/off
-
-    # Methods
-        _call(inputs): Defines computation graph of layer
-            (i.e. takes input, returns output)
-        __call__(inputs): Wrapper for _call()
-        _log_vars(): Log all variables
-    """
-
-    def __init__(self, **kwargs):
-        allowed_kwargs = {'name', 'logging'}
-        for kwarg in kwargs.keys():
-            assert kwarg in allowed_kwargs, 'Invalid keyword argument: ' + kwarg
-        name = kwargs.get('name')
-        if not name:
-            layer = self.__class__.__name__.lower()
-            name = layer + '_' + str(get_layer_uid(layer))
-        self.name = name
-        self.vars = {}
-        logging = kwargs.get('logging', False)
-        self.logging = logging
-        self.sparse_inputs = False
-
-    def _call(self, inputs):
-        return inputs
-
-    def __call__(self, inputs):
-        with tf.name_scope(self.name):
-            if self.logging and not self.sparse_inputs:
-                tf.summary.histogram(self.name + '/inputs', inputs)
-            outputs = self._call(inputs)
-            if self.logging:
-                tf.summary.histogram(self.name + '/outputs', outputs)
-            return outputs
-
-    def _log_vars(self):
-        for var in self.vars:
-            tf.summary.histogram(self.name + '/vars/' + var, self.vars[var])
 
 
-class Dense(Layer):
+class Dense(layers.Layer):
     """Dense layer."""
     def __init__(self, input_dim, output_dim, placeholders, dropout=0., sparse_inputs=False,
                  act=tf.nn.relu, bias=False, featureless=False, **kwargs):
@@ -169,9 +124,9 @@ class GraphConvolution(layers.Layer):
         x, support_ = inputs
 
         # dropout
-        if self.is_sparse_inputs:
+        if training and self.is_sparse_inputs:
             x = sparse_dropout(x, self.dropout, self.num_features_nonzero)
-        else:
+        elif training:
             x = tf.nn.dropout(x, self.dropout)
 
 

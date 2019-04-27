@@ -9,15 +9,18 @@ from    config import args
 import  os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 print('tf version:', tf.__version__)
+assert tf.__version__.startswith('2.')
 
-# Set random seed
+
+
+# set random seed
 seed = 123
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
 
 
-# Load data
+# load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(args.dataset)
 print('adj:', adj.shape)
 print('features:', features.shape)
@@ -26,7 +29,6 @@ print('mask:', train_mask.shape, val_mask.shape, test_mask.shape)
 
 
 
-# Some preprocessing
 # D^-1@X
 features = preprocess_features(features) # [49216, 2], [49216], [2708, 1433]
 print('features coordinates::', features[0].shape)
@@ -49,19 +51,10 @@ elif args.model == 'dense':
 else:
     raise ValueError('Invalid argument for model: ' + str(args.model))
 
-# # Define placeholders
-# placeholders = {
-#     'support': [tf.sparse_placeholder(tf.float32) for _ in range(num_supports)],
-#     'features': tf.sparse_placeholder(tf.float32, shape=tf.constant(features[2], dtype=tf.int64)),
-#     'labels': tf.placeholder(tf.float32, shape=(None, y_train.shape[1])),
-#     'labels_mask': tf.placeholder(tf.int32),
-#     'dropout': tf.placeholder_with_default(0., shape=()),
-#     'num_features_nonzero': tf.placeholder(tf.int32)  # helper variable for sparse dropout
-# }
+
 
 # Create model
-model = GCN(input_dim=features[2][1], output_dim=y_train.shape[1],
-                num_features_nonzero=features[1].shape) # [1433]
+model = GCN(input_dim=features[2][1], output_dim=y_train.shape[1], num_features_nonzero=features[1].shape) # [1433]
 
 
 
@@ -74,17 +67,14 @@ features = tf.SparseTensor(*features)
 support = [tf.cast(tf.SparseTensor(*support[0]), dtype=tf.float32)]
 num_features_nonzero = features.values.shape
 dropout = args.dropout
-print(num_features_nonzero, support[0].dtype)
 
 
-optimizer = optimizers.Adam(lr=1e-3)
+optimizer = optimizers.Adam(lr=1e-2)
 
 cost_val = []
 
-# Train model
-for epoch in range(args.epochs):
 
-    t = time.time()
+for epoch in range(args.epochs):
 
     with tf.GradientTape() as tape:
         loss, acc = model((features, train_label, train_mask,support))
@@ -92,8 +82,7 @@ for epoch in range(args.epochs):
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
 
-
-    _, val_acc = model((features, val_label, val_mask, support))
+    _, val_acc = model((features, val_label, val_mask, support), training=False)
 
 
     print(epoch, float(loss), float(acc), '\tval:', float(val_acc))
