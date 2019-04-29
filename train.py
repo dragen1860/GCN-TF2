@@ -82,7 +82,6 @@ for epoch in range(args.epochs):
     grads = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-
     _, val_acc = model((features, val_label, val_mask, support), training=False)
 
 
