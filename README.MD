@@ -7,7 +7,7 @@ GCN implementation for paper: [Semi-Supervised Classification with Graph Convolu
 | dataset       | Citeseea | Cora | Pubmed | NELL |
 |---------------|----------|------|--------|------|
 | GCN(official) | 70.3     | 81.5 | 79.0   | 66.0 |
-| This repo.    |          | 81.8 |        |      |
+| This repo.    |          | 81.8 |   78.9  |      |
 
 # HOWTO
 ```
