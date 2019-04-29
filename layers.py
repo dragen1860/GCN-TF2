@@ -119,6 +119,10 @@ class GraphConvolution(layers.Layer):
             self.bias = self.add_variable('bias', [output_dim])
 
 
+        # for p in self.trainable_variables:
+        #     print(p.name, p.shape)
+
+
 
     def call(self, inputs, training=None):
         x, support_ = inputs
