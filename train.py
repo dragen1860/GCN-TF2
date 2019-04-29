@@ -85,7 +85,9 @@ for epoch in range(args.epochs):
     _, val_acc = model((features, val_label, val_mask, support), training=False)
 
 
-    print(epoch, float(loss), float(acc), '\tval:', float(val_acc))
+    if epoch % 20 == 0:
+
+        print(epoch, float(loss), float(acc), '\tval:', float(val_acc))
 
 
 

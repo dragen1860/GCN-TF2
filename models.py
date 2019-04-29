@@ -75,6 +75,11 @@ class GCN(keras.Model):
                                             dropout=args.dropout,
                                             is_sparse_inputs=True))
 
+
+
+
+
+
         self.layers_.append(GraphConvolution(input_dim=args.hidden1, # 16
                                             output_dim=self.output_dim, # 7
                                             num_features_nonzero=num_features_nonzero,
@@ -82,7 +87,8 @@ class GCN(keras.Model):
                                             dropout=args.dropout))
 
 
-
+        for p in self.trainable_variables:
+            print(p.name, p.shape)
 
     def call(self, inputs, training=None):
         """
